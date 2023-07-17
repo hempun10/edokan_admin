@@ -5,7 +5,7 @@ import CellAction from "./cell-action";
 
 export type BillBoardColumn = {
   id: string;
-  label: number;
+  label: string;
   createdAt: string;
 };
 

@@ -13,9 +13,9 @@ import { Copy, Edit, MoreHorizontal, Trash } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import { BillBoardColumn } from "./columns";
+import { ProductColoumn } from "./columns";
 interface CellActionProps {
-  data: BillBoardColumn;
+  data: ProductColoumn;
 }
 
 const CellAction = ({ data }: CellActionProps) => {
@@ -30,13 +30,11 @@ const CellAction = ({ data }: CellActionProps) => {
   const onDelete = async () => {
     try {
       setIsLoading(true);
-      await axios.delete(`/api/${params.storeId}/billboards/${data.id}`);
+      await axios.delete(`/api/${params.storeId}/products/${data.id}`);
       router.refresh();
-      toast.success("Billboard Deleted");
+      toast.success("Product Deleted");
     } catch (error) {
-      toast.error(
-        "Make sure you removed all categories using this billboard first"
-      );
+      toast.error("Something Went Wrong");
     } finally {
       setIsLoading(false);
       setOpen(false);
@@ -61,7 +59,7 @@ const CellAction = ({ data }: CellActionProps) => {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
             onClick={() =>
-              router.push(`/${params.storeId}/billboards/${data.id}`)
+              router.push(`/${params.storeId}/products/${data.id}`)
             }
           >
             <Edit className=" h-4 w-4 mr-2 " /> Update

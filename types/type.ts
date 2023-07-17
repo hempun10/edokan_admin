@@ -1,8 +1,18 @@
 import { BillBoardColumn } from "@/app/(dashboard)/[storeId]/(routes)/billboards/components/columns";
 import { ColorColumn } from "@/app/(dashboard)/[storeId]/(routes)/colors/components/columns";
+import { OrderColumn } from "@/app/(dashboard)/[storeId]/(routes)/orders/components/columns";
+import { ProductColoumn } from "@/app/(dashboard)/[storeId]/(routes)/products/components/columns";
 import { SizeColumn } from "@/app/(dashboard)/[storeId]/(routes)/sizes/components/columns";
 import { PopoverTrigger } from "@/components/ui/popover";
-import { Billboard, Category, Color, Size, Store } from "@prisma/client";
+import {
+  Billboard,
+  Category,
+  Color,
+  Image,
+  Product,
+  Size,
+  Store,
+} from "@prisma/client";
 import React from "react";
 
 export interface AuthLayoutTypes {
@@ -55,6 +65,16 @@ export interface SizeFormType {
 export interface ColorFormType {
   initialData: Color | null;
 }
+export interface ProductFormType {
+  initialData:
+    | (Product & {
+        images: Image[];
+      })
+    | null;
+  categories: Category[];
+  colors: Color[];
+  sizes: Size[];
+}
 
 export interface HeadingPropType {
   title: string;
@@ -88,6 +108,12 @@ export interface SizesClientTypes {
 }
 export interface ColorClientTypes {
   data: ColorColumn[];
+}
+export interface ProductClientTypes {
+  data: ProductColoumn[];
+}
+export interface OrderCilentTypes {
+  data: OrderColumn[];
 }
 
 export interface ApiListTypes {
