@@ -1,14 +1,17 @@
 "use client";
-import * as z from "zod";
-import Heading from "@/components/ui/Heading";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { ColorFormType } from "@/types/type";
 
-import { Trash } from "lucide-react";
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import * as z from "zod";
+import axios from "axios";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { toast } from "react-hot-toast";
+import { Trash } from "lucide-react";
+import { Color } from "@prisma/client";
+import { useParams, useRouter } from "next/navigation";
+
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -17,44 +20,45 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { toast } from "react-hot-toast";
-import axios from "axios";
-import { useParams, useRouter } from "next/navigation";
+import { Separator } from "@/components/ui/separator";
+import Heading from "@/components/ui/Heading";
 import { AlertModal } from "@/components/modals/alert-modal";
-import { useOrigin } from "@/hooks/use-origin";
 
-const fromSchema = z.object({
-  name: z.string().min(1),
-  value: z.string().min(4).regex(/^#/, {
+const formSchema = z.object({
+  name: z.string().min(2),
+  value: z.string().min(4).max(9).regex(/^#/, {
     message: "String must be a valid hex code",
   }),
 });
-type ColorFormValue = z.infer<typeof fromSchema>;
 
-const ColorForm = ({ initialData }: ColorFormType) => {
+type ColorFormValues = z.infer<typeof formSchema>;
+
+interface ColorFormProps {
+  initialData: Color | null;
+}
+
+export const ColorForm: React.FC<ColorFormProps> = ({ initialData }) => {
   const params = useParams();
   const router = useRouter();
-  const origin = useOrigin();
+
   const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const title = initialData ? "Edit Color" : "Create Color";
-  const description = initialData ? "Edit a Color" : "Add a new Color";
-  const toastMessage = initialData ? "Color Updated" : "Color Created";
-  const action = initialData ? "Save Changes" : "Create Color";
+  const title = initialData ? "Edit color" : "Create color";
+  const description = initialData ? "Edit a color." : "Add a new color";
+  const toastMessage = initialData ? "Color updated." : "Color created.";
+  const action = initialData ? "Save changes" : "Create";
 
-  const form = useForm<ColorFormType>({
-    resolver: zodResolver(fromSchema),
-    //@ts-ignore
+  const form = useForm<ColorFormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: initialData || {
       name: "",
-      value: "",
     },
   });
-  const onSubmit = async (data: ColorFormValue) => {
+
+  const onSubmit = async (data: ColorFormValues) => {
     try {
-      setIsLoading(true);
+      setLoading(true);
       if (initialData) {
         await axios.patch(
           `/api/${params.storeId}/colors/${params.colorId}`,
@@ -66,46 +70,46 @@ const ColorForm = ({ initialData }: ColorFormType) => {
       router.refresh();
       router.push(`/${params.storeId}/colors`);
       toast.success(toastMessage);
-    } catch (error) {
-      toast.error("Something went wrong");
+    } catch (error: any) {
+      toast.error("Something went wrong.");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
+
   const onDelete = async () => {
     try {
-      setIsLoading(true);
+      setLoading(true);
       await axios.delete(`/api/${params.storeId}/colors/${params.colorId}`);
       router.refresh();
       router.push(`/${params.storeId}/colors`);
-      toast.success("Color Deleted");
-    } catch (error) {
-      toast.error("Make sure you removed all product using this color first");
+      toast.success("Color deleted.");
+    } catch (error: any) {
+      toast.error("Make sure you removed all products using this color first.");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
       setOpen(false);
     }
   };
+
   return (
     <>
       <AlertModal
         isOpen={open}
         onClose={() => setOpen(false)}
-        loading={isLoading}
         onConfirm={onDelete}
+        loading={loading}
       />
-      <div className=" flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <Heading title={title} description={description} />
         {initialData && (
           <Button
-            disabled={isLoading}
+            disabled={loading}
             variant="destructive"
             size="sm"
-            onClick={() => {
-              setOpen(true);
-            }}
+            onClick={() => setOpen(true)}
           >
-            <Trash className=" h-4 w-4" />
+            <Trash className="h-4 w-4" />
           </Button>
         )}
       </div>
@@ -113,9 +117,9 @@ const ColorForm = ({ initialData }: ColorFormType) => {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className=" space-y-8 w-full"
+          className="space-y-8 w-full"
         >
-          <div className="grid grid-cols-3 gap-8">
+          <div className="md:grid md:grid-cols-3 gap-8">
             <FormField
               control={form.control}
               name="name"
@@ -124,8 +128,8 @@ const ColorForm = ({ initialData }: ColorFormType) => {
                   <FormLabel>Name</FormLabel>
                   <FormControl>
                     <Input
-                      disabled={isLoading}
-                      placeholder="Color Name"
+                      disabled={loading}
+                      placeholder="Color name"
                       {...field}
                     />
                   </FormControl>
@@ -142,12 +146,12 @@ const ColorForm = ({ initialData }: ColorFormType) => {
                   <FormControl>
                     <div className="flex items-center gap-x-4">
                       <Input
-                        disabled={isLoading}
-                        placeholder="Color Value"
+                        disabled={loading}
+                        placeholder="Color value"
                         {...field}
                       />
                       <div
-                        className=" border p-4 rounded-full"
+                        className="border p-4 rounded-full"
                         style={{ backgroundColor: field.value }}
                       />
                     </div>
@@ -157,7 +161,7 @@ const ColorForm = ({ initialData }: ColorFormType) => {
               )}
             />
           </div>
-          <Button disabled={isLoading} className=" ml-auto" type="submit">
+          <Button disabled={loading} className="ml-auto" type="submit">
             {action}
           </Button>
         </form>
@@ -165,5 +169,3 @@ const ColorForm = ({ initialData }: ColorFormType) => {
     </>
   );
 };
-
-export default ColorForm;
