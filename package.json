@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:push": "npx prisma db push",
+    "db:generate": "npx prisma generate"
   },
   "dependencies": {
     "@clerk/nextjs": "^4.21.14",
@@ -37,6 +39,7 @@
     "next": "13.4.9",
     "next-cloudinary": "^4.14.1",
     "next-themes": "^0.2.1",
+    "nextjs-toploader": "^1.6.12",
     "postcss": "8.4.25",
     "react": "18.2.0",
     "react-dom": "18.2.0",
